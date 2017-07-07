@@ -15,17 +15,10 @@ namespace Palindrome
         /// <returns>A list of palindromes</returns>
         public static IEnumerable<string> FindPalindromes(IEnumerable<string> words)
         {
-            IEnumerable<string> results = new List<string>();
-
-            var count = words.Count();
-            while (count > 0)
-            {
-                var perms = Perms(words, count--)
-                    .Select(x => x.Aggregate((w, n) => w + n)).Where(x => IsPalindrome(x));
-                results = results.Concat(perms);
-            }
-               
-            return results;
+            return Enumerable.Range(1, words.Count())
+                            .SelectMany(i => Perms(i, words)
+                            .Select(x => x.Aggregate((w, n) => w + n))
+                            .Where(x => IsPalindrome(x)));
         }
 
         /// <summary>
@@ -34,14 +27,14 @@ namespace Palindrome
         /// <param name="words">The list of words</param>
         /// <param name="length">The number of words to choose from the list</param>
         /// <returns>Enumerable containing the permutations</returns>
-        private static IEnumerable<IEnumerable<string>> Perms(IEnumerable<string> words, int length)
+        private static IEnumerable<IEnumerable<string>> Perms(int length, IEnumerable<string> words)
         {
             if (length == 1)
             {
                 return words.Select(w => new string[] { w });
             }
 
-            return Perms(words, length - 1)
+            return Perms(length - 1, words)
                 .SelectMany(w => words
                 .Where(e => !w.Contains(e)), (t1, t2) => t1.Concat(new string[] { t2 }));
         }
